@@ -1,0 +1,241 @@
+---
+title: "AppliedEx"
+author: "Anuhya B S"
+date: '2023-01-22'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Applied Exercise
+
+**8. This exercise relates to the College data set, which can be found in the file College.csv on the book website. It contains a number of variables for 777 different universities and colleges in the US. The variables are**
+
+  - `Private` : Public/private indicator
+  - `Apps` : Number of applications received
+  - `Accept` : Number of applicants accepted
+  - `Enroll` : Number of new students enrolled
+  - `Top10perc` : New students from top 10% of high school class
+  - `Top25perc` : New students from top 25% of high school class
+  - `F.Undergrad` : Number of full-time undergraduates
+  - `P.Undergrad` : Number of part-time undergraduates
+  - `Outstate` : Out-of-state tuition
+  - `Room.Board` : Room and board costs
+  - `Books` : Estimated book costs
+  - `Personal` : Estimated personal spending
+  - `PhD` : Percent of faculty with Ph.D.’s
+  - `Terminal` : Percent of faculty with terminal degree
+  - `S.F.Ratio` : Student/faculty ratio
+  - `perc.alumni` : Percent of alumni who donate
+  - `Expend` : Instructional expenditure per student
+  - `Grad.Rate` : Graduation rate
+
+**Before reading the data into R, it can be viewed in Excel or a text editor.**
+
+**(a) Use the `read.csv()` function to read the data into R. Call the loaded data `college`. Make sure that you have the directory set to the correct location for the data.**
+```{r}
+college <- read.csv('College.csv')
+```
+
+**(b) Look at the data using the `View()` function. Store the college names as row names and remove the column.**
+```{r}
+View(college)
+rownames(college) <- college[,1]
+View(college)
+college <- college[,-1]
+View(college)
+```
+
+**(c) i. Use the `summary()` function to produce a numerical summary of the variables in the data set.**
+```{r}
+summary(college)
+```
+
+**ii. Use the `pairs()` function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall that you can reference the first ten columns of a matrix A using A[,1:10].**
+```{r}
+college$Private <- as.factor(college$Private)
+pairs(college[,1:10])
+```
+
+**iii. Use the `plot()`s function to produce side-by-side boxplots of Outstate versus Private.**
+```{r}
+plot(college$Private,college$Outstate,xlab="Private",ylab="Outstate")
+```
+
+**iv. Create a new qualitative variable, called `Elite`, by binning the Top10perc variable. We are going to divide universities into two groups based on whether or not the proportion of students coming from the top 10% of their high school classes exceeds 50 %. Use the `summary()` function to see how many elite universities there are. Now use the `plot()` function to produce side-by-side boxplots of Outstate versus Elite.**
+```{r}
+Elite <- rep("No", nrow(college))
+Elite[college$Top10perc > 50] <- "Yes"
+Elite <- as.factor(Elite)
+college <- data.frame(college,Elite)
+```
+
+```{r}
+summary(Elite)
+```
+```{r}
+plot(college$Elite,college$Outstate,xlab="Elite",ylab="Outstate")
+```
+
+**v. Use the `hist()` function to produce some histograms with differing numbers of bins for a few of the quantitative variables.**
+```{r}
+par(mfrow=c(2,2))
+hist(college$Apps, breaks = 20, xlab = "Applications, 20 bins")
+hist(college$Apps, breaks = 100, xlab = "Applictions, 100 bins")
+hist(college$S.F.Ratio, breaks = 20, xlab = "S.F.Ratio, 20 bins")
+hist(college$S.F.Ratio, breaks = 100, xlab = "S.F.Ratio, 100 bins")
+```
+**vi. Continue exploring the data, and provide a brief summary of what you discover.**
+
+
+**9. This exercise involves the Auto data set studied in the lab. Make sure that the missing values have been removed from the data.**
+```{r}
+auto <- read.table("Auto.data", header = T,na.strings = "?", stringsAsFactors = T)
+auto <- na.omit(auto)
+head(auto)
+```
+
+**(a) Which of the predictors are quantitative, and which are qualitative?**
+
+Quantitative:
+- mpg
+- displacement
+- horsepower
+- weight
+- acceleration
+
+Qualitative:
+- cylinders
+- year
+- origin
+- name
+
+**(b) What is the range of each quantitative predictor?** 
+```{r}
+quant = subset(auto,select=c('mpg','displacement','horsepower','weight','acceleration'))
+t(sapply(quant, range))
+```
+
+**(c) What is the mean and standard deviation of each quantitative predictor?**
+```{r}
+t(sapply(quant, mean))
+t(sapply(quant, sd))
+```
+
+**(d) Now remove the 10th through 85th observations. What is the range, mean, and standard deviation of each predictor in the subset of the data that remains?**
+```{r}
+new_df =quant[-c(10:85),]
+apply(new_df,2,range)
+apply(new_df,2,mean)
+apply(new_df,2,sd)
+```
+
+**(e) Using the full data set, investigate the predictors graphically, using scatterplots or other tools of your choice. Create some plots highlighting the relationships among the predictors. Comment on your findings.**
+```{r}
+pairs(auto)
+```
+
+**(f) Suppose that we wish to predict gas mileage (mpg) on the basis of the other variables. Do your plots suggest that any of the other variables might be useful in predicting mpg? Justify your answer.**
+```{r}
+plot(quant$mpg,quant$weight)
+```
+```{r}
+plot(quant$mpg,quant$acceleration)
+```
+
+**10. This exercise involves the Boston housing data set.**
+
+**(a) To begin, load in the Boston data set. The Boston data set is part of the ISLR2 library. How many rows are in this data set? How many columns? What do the rows and columns represent?**
+```{r}
+library(ISLR2)
+dim(Boston)
+```
+A data frame with 506 rows and 13 variables (columns).
+The data set contains housing values in 506 suburbs of Boston.
+Rows represent data for the 506 suburbs of Boston.
+Columns represent the housing values for these suburbs.
+
+**(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.**
+```{r}
+pairs(Boston)
+```
+```{r}
+round(cor(Boston),2)
+```
+On a first glance, correlations between some of the predictors seem obvious. For example:
+1. between the nitrogen oxides concentration and the proportion of owner-occupied units prior to 1940
+2. between nitrogen oxides concentration and proportion of non-retail business acres per town
+3. between nitrogen oxides concentration and weighted mean of distances to five Boston employment centres
+4. weighted mean of distances to five Boston employment centres and the proportion of owner-occupied units prior to 1940
+
+**(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.**
+
+There don't seem to be any very strong linear associations between the predictors and the per capita crime rate variable. However, based on the correlations it can be said that the variables rad(index of accessibility to radial highways), tax (full-value property-tax rate per $10,000), lstat (lower status of the population (percent)), nox(nitrogen oxides concentration (parts per 10 million)) and indus(proportion of non-retail business acres per town) are more associated with per capita crime rate.
+
+It can also be noted that all the data points seem to be right skewed for the predictors and per capita crime rate.
+
+**(d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.**
+```{r}
+hist(Boston$crim,breaks = 20)
+plot(Boston$crim)
+```
+As it can be seen from the above plots, there are some suburbs (especially the ones between indexes 350-500) that have higher crime rate but most suburbs have low per capita crime rates.
+```{r}
+hist(Boston$tax)
+plot(Boston$tax)
+```
+Yes, there are some suburbs that have particularly high rates as can be seen from the plots above.
+```{r}
+hist(Boston$ptratio)
+plot(Boston$ptratio)
+```
+The pupil teacher ratio is particulary high (between 20-21) for some suburbs as can be seen from the plots above.
+
+The ranges of each of these predictors is as follows:
+1. Crime : 0.00632-88.97620
+2. Tax: 187-711
+3. Pupil: Student Ratio : 12.6-22.0
+
+The crime rate on an avergae is lesser for all suburbs and the max value in the range of crime rate is particularly influenced by a single data point.
+
+The max value of the range of tax rate is influenced by multiple suburbs in the dataset. It can also be seen that there is a huge gap in the histogram which means that most suburbs have tax rate less than 500 and then greater than 650.
+
+The max value in the range of pupil-teacher ratio is due to a single suburb but there sames seem to be an uncommonly high number of suburbs that have high ptratio.
+
+**(e) How many of the census tracts in this data set bound the Charles river?**
+```{r}
+library(ggplot2)
+ggplot(Boston, aes(x = chas)) +
+  geom_bar()
+nrow(subset(Boston,chas==1))
+```
+There are 35 suburbs that bound the Charles river.
+
+**(f) What is the median pupil-teacher ratio among the towns in this data set?**
+```{r}
+median(Boston$ptratio)
+```
+
+**(g) Which census tract of Boston has lowest median value of owner occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.**
+```{r}
+range(Boston$medv)
+low_medv = subset(Boston,medv==5)
+nrow(low_medv)
+low_medv
+apply(low_medv,2,range)
+apply(Boston,2,range)
+```
+There are 2 suburbs that have the lowest median value of owner-occupied homes (5).
+
+**(h) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling.**
+```{r}
+nrow(subset(Boston,rm>7))
+```
+```{r}
+nrow(subset(Boston,rm>8))
+```
+There are 64 suburbs that average more than 7 rooms per dwelling and 13 suburbs that average 8 rooms per dwelling.
+
+Most suburbs that average more than 8 room per dwelling are older in age, relatively closer to radial highways, have lower crime rates and are not really bound the Charles river.
